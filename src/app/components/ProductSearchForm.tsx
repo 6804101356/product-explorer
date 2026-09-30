@@ -1,78 +1,80 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { SORT_FIELDS, SearchQuerySchema, defaultQuery } from "../lib/products";
-import type { SearchQuery } from "../lib/products";
+import { useState } from "react";
+import { CATEGORIES, type SearchParams } from "../lib/products";
 
-type ProductSearchFormProps = {
-  onSearch: (query: SearchQuery) => Promise<void>;
-};
+interface ProductSearchFormProps {
+  onSearch: (params?: SearchParams) => void | Promise<void>;
+}
 
 export default function ProductSearchForm({ onSearch }: ProductSearchFormProps) {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<SearchQuery>({
-    resolver: zodResolver(SearchQuerySchema),
-    mode: "onTouched",
-    defaultValues: defaultQuery,
-  });
+  const [q, setQ] = useState("");
+  const [category, setCategory] = useState("");
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSearch({ q, category });
+  };
+
+  const handleReset = () => {
+    setQ("");
+    setCategory("");
+    onSearch({});
+  };
 
   return (
-    <form 
-      onSubmit={handleSubmit(onSearch)} 
-      noValidate 
-      className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 mb-6 flex flex-wrap gap-4 items-end"
-    >
-      <div className="flex-1 min-w-[180px]">
-        <label htmlFor="q" className="block text-xs font-semibold text-slate-600 mb-1">คำค้นหา</label>
-        <input 
-          id="q" 
-          {...register("q")} 
-          placeholder="เช่น phone, laptop..." 
-          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition"
-        />
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <h2 className="text-base font-semibold text-sky-600 flex items-center gap-2">
+        <span className="w-2.5 h-2.5 rounded-full bg-sky-500"></span>
+        ค้นหาสินค้า
+      </h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-medium text-slate-600 mb-1">
+            คำค้นหา (ชื่อสินค้า)
+          </label>
+          <input
+            type="text"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="ค้นหาชื่อสินค้า..."
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-700"
+          />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-slate-600 mb-1">
+            หมวดหมู่
+          </label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-700 bg-white"
+          >
+            <option value="">ทั้งหมด</option>
+            {CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
-      <div className="w-28">
-        <label htmlFor="limit" className="block text-xs font-semibold text-slate-600 mb-1">จำนวนรายการ</label>
-        <input
-          id="limit"
-          type="number"
-          required
-          {...register("limit", { valueAsNumber: true })}
-          aria-invalid={!!errors.limit}
-          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition"
-        />
-        {errors.limit && (
-          <span className="text-xs text-rose-500 mt-1 block font-medium">{errors.limit?.message}</span>
-        )}
-      </div>
-
-      <div className="w-36">
-        <label htmlFor="sortBy" className="block text-xs font-semibold text-slate-600 mb-1">เรียงตาม</label>
-        <select 
-          id="sortBy" 
-          {...register("sortBy")}
-          className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition"
+      <div className="flex gap-2 justify-end">
+        <button
+          type="button"
+          onClick={handleReset}
+          className="px-4 py-2 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
         >
-          {SORT_FIELDS.map((field) => (
-            <option key={field} value={field}>
-              {field}
-            </option>
-          ))}
-        </select>
+          ล้างการค้นหา
+        </button>
+        <button
+          type="submit"
+          className="px-4 py-2 text-xs font-medium text-white bg-sky-500 hover:bg-sky-600 rounded-xl transition-colors"
+        >
+          ค้นหา
+        </button>
       </div>
-
-      <button 
-        type="submit" 
-        disabled={isSubmitting}
-        className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm rounded-lg shadow-sm hover:shadow transition disabled:opacity-50"
-      >
-        {isSubmitting ? "กำลังค้นหา..." : "ค้นหา"}
-      </button>
     </form>
   );
 }

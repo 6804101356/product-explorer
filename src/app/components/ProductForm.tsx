@@ -1,126 +1,132 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { CATEGORIES, ProductDraftSchema } from "../lib/products";
-import type { Product, ProductDraft } from "../lib/products";
+import { useState, useEffect } from "react";
+import { CATEGORIES, type Product, type ProductDraft } from "../lib/products";
 
-type ProductFormProps = {
-  editing: Product | null;
-  onSave: (draft: ProductDraft) => void;
-  onCancel: () => void;
-};
+interface ProductFormProps {
+  onSuccess: (draft: ProductDraft) => void | Promise<void>;
+  initialValues?: Product;
+  onCancel?: () => void;
+}
 
-export default function ProductForm({ editing, onSave, onCancel }: ProductFormProps) {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors, isDirty, isValid },
-  } = useForm<ProductDraft>({
-    resolver: zodResolver(ProductDraftSchema),
-    mode: "onTouched",
-    defaultValues: editing
-      ? {
-          title: editing.title,
-          price: editing.price,
-          stock: editing.stock,
-          category: editing.category,
-        }
-      : { title: "", price: undefined, stock: undefined, category: "" },
-  });
+export default function ProductForm({
+  onSuccess,
+  initialValues,
+  onCancel,
+}: ProductFormProps) {
+  const [title, setTitle] = useState("");
+  const [price, setPrice] = useState("");
+  const [stock, setStock] = useState("");
+  const [category, setCategory] = useState("");
 
-  function saveProduct(values: ProductDraft) {
-    onSave(values);
-    reset();
-  }
+  useEffect(() => {
+    if (initialValues) {
+      setTitle(initialValues.title);
+      setPrice(String(initialValues.price));
+      setStock(String(initialValues.stock));
+      setCategory(initialValues.category);
+    } else {
+      setTitle("");
+      setPrice("");
+      setStock("");
+      setCategory("");
+    }
+  }, [initialValues]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSuccess({
+      title,
+      price: Number(price),
+      stock: Number(stock),
+      category,
+    });
+    if (!initialValues) {
+      setTitle("");
+      setPrice("");
+      setStock("");
+      setCategory("");
+    }
+  };
 
   return (
-    <form 
-      onSubmit={handleSubmit(saveProduct)} 
-      noValidate 
-      className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-8"
-    >
-      <h2 className="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
-        <span className={`w-2.5 h-2.5 rounded-full ${editing ? 'bg-amber-500' : 'bg-emerald-500'}`}></span>
-        {editing ? "แก้ไขรายการสินค้า" : "เพิ่มสินค้าใหม่"}
-      </h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="title" className="block text-xs font-semibold text-slate-500 mb-1">ชื่อสินค้า</label>
+          <label className="block text-xs font-medium text-slate-600 mb-1">
+            ชื่อสินค้า
+          </label>
           <input
-            id="title"
+            type="text"
             required
-            {...register("title")}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
             placeholder="เช่น iPhone 15 Pro"
-            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition"
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-700"
           />
-          {errors.title && <span className="text-xs text-rose-500 mt-1 block font-medium">{errors.title?.message}</span>}
         </div>
-
         <div>
-          <label htmlFor="price" className="block text-xs font-semibold text-slate-500 mb-1">ราคา ($)</label>
+          <label className="block text-xs font-medium text-slate-600 mb-1">
+            ราคา ($)
+          </label>
           <input
-            id="price"
             type="number"
             step="0.01"
             required
-            {...register("price", { valueAsNumber: true })}
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
             placeholder="0.00"
-            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition"
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-700"
           />
-          {errors.price && <span className="text-xs text-rose-500 mt-1 block font-medium">{errors.price?.message}</span>}
         </div>
-
         <div>
-          <label htmlFor="stock" className="block text-xs font-semibold text-slate-500 mb-1">จำนวนคงเหลือ</label>
+          <label className="block text-xs font-medium text-slate-600 mb-1">
+            จำนวนคงเหลือ
+          </label>
           <input
-            id="stock"
             type="number"
             required
-            {...register("stock", { valueAsNumber: true })}
+            value={stock}
+            onChange={(e) => setStock(e.target.value)}
             placeholder="0"
-            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition"
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-700"
           />
-          {errors.stock && <span className="text-xs text-rose-500 mt-1 block font-medium">{errors.stock?.message}</span>}
         </div>
-
         <div>
-          <label htmlFor="category" className="block text-xs font-semibold text-slate-500 mb-1">หมวดหมู่</label>
+          <label className="block text-xs font-medium text-slate-600 mb-1">
+            หมวดหมู่
+          </label>
           <select
-            id="category"
             required
-            {...register("category")}
-            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition capitalize"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full px-3 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-700 bg-white"
           >
-            <option value="">-- เลือกหมวดหมู่ --</option>
-            {CATEGORIES.map((name) => (
-              <option key={name} value={name}>
-                {name}
+            <option value="">เลือกหมวดหมู่</option>
+            {CATEGORIES.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
               </option>
             ))}
           </select>
-          {errors.category && <span className="text-xs text-rose-500 mt-1 block font-medium">{errors.category?.message}</span>}
         </div>
       </div>
 
       <div className="flex gap-2 justify-end">
-        {editing && (
-          <button 
-            type="button" 
+        {onCancel && (
+          <button
+            type="button"
             onClick={onCancel}
-            className="px-4 py-2 border border-slate-200 text-slate-600 font-medium text-sm rounded-lg hover:bg-slate-50 transition"
+            className="px-4 py-2 text-xs font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
           >
             ยกเลิก
           </button>
         )}
-        <button 
-          type="submit" 
-          disabled={!isDirty || !isValid}
-          className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-sm rounded-lg shadow-sm hover:shadow transition disabled:opacity-40"
+        <button
+          type="submit"
+          className="px-4 py-2 text-xs font-medium text-white bg-sky-500 hover:bg-sky-600 rounded-xl transition-colors"
         >
-          {editing ? "บันทึกการแก้ไข" : "+ เพิ่มสินค้า"}
+          {initialValues ? "บันทึกการแก้ไข" : "บันทึกสินค้า"}
         </button>
       </div>
     </form>

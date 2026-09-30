@@ -1,13 +1,29 @@
 import { z } from "zod";
 
 export const CATEGORIES = [
-  "beauty", "fragrances", "furniture", "groceries",
-  "home-decoration", "kitchen-accessories", "laptops",
-  "mens-shirts", "mens-shoes", "mens-watches",
-  "mobile-accessories", "motorcycle", "skin-care",
-  "smartphones", "sports-accessories", "sunglasses",
-  "tablets", "tops", "vehicle", "womens-bags",
-  "womens-dresses", "womens-jewellery", "womens-shoes", "womens-watches",
+  "beauty",
+  "fragrances",
+  "furniture",
+  "groceries",
+  "home-decoration",
+  "kitchen-accessories",
+  "laptops",
+  "mens-shirts",
+  "mens-shoes", "mens-watches",
+  "mobile-accessories",
+  "motorcycle",
+  "skin-care",
+  "smartphones",
+  "sports-accessories",
+  "sunglasses",
+  "tablets",
+  "tops",
+  "vehicle",
+  "womens-bags",
+  "womens-dresses",
+  "womens-jewellery",
+  "womens-shoes",
+  "womens-watches",
 ] as const;
 
 export const ProductSchema = z.object({
@@ -38,16 +54,19 @@ const API_BASE = "https://dummyjson.com";
 export const SORT_FIELDS = ["title", "price", "stock"] as const;
 
 export const SearchQuerySchema = z.object({
-  q: z.string().trim(),
+  q: z.string().trim().optional(),
+  category: z.string().optional(),
   limit: z
     .number({ message: "กรุณากรอกจำนวนรายการ" })
     .int("จำนวนรายการต้องเป็นจำนวนเต็ม")
     .min(1, "อย่างน้อย 1 รายการ")
-    .max(30, "ไม่เกิน 30 รายการ"),
-  sortBy: z.enum(SORT_FIELDS),
+    .max(30, "ไม่เกิน 30 รายการ")
+    .optional(),
+  sortBy: z.enum(SORT_FIELDS).optional(),
 });
 
 export type SearchQuery = z.infer<typeof SearchQuerySchema>;
+export type SearchParams = SearchQuery;
 
 export const defaultQuery: SearchQuery = {
   q: "",
@@ -57,9 +76,9 @@ export const defaultQuery: SearchQuery = {
 
 export function buildProductUrl(query: SearchQuery): string {
   const params = new URLSearchParams();
-  params.set("q", query.q);
-  params.set("limit", String(query.limit));
-  params.set("sortBy", query.sortBy);
+  if (query.q) params.set("q", query.q);
+  if (query.limit) params.set("limit", String(query.limit));
+  if (query.sortBy) params.set("sortBy", query.sortBy);
   params.set("order", "asc");
   params.set("select", "title,price,stock,category");
   return `${API_BASE}/products/search?${params.toString()}`;
@@ -67,7 +86,7 @@ export function buildProductUrl(query: SearchQuery): string {
 
 export async function fetchProducts(query: SearchQuery): Promise<ProductList> {
   const response = await fetch(buildProductUrl(query));
-  
+
   if (!response.ok) {
     throw new Error(`เรียกข้อมูลไม่สำเร็จ สถานะ ${response.status}`);
   }
