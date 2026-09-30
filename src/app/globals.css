@@ -1,26 +1,161 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600&display=swap');
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-gradient: linear-gradient(135deg, #fff5f7 0%, #f0f4ff 100%);
+  --card-bg: #ffffff;
+  --primary-color: #3a43ff;
+  --primary-hover: #6b75ff;
+  --text-main: #4a4a6a;
+  --text-muted: #8c8ca1;
+  --border-color: #ffe3e8;
+  --accent-soft: #f8f0fc;
+  --radius: 20px;
+  --shadow: 0 10px 30px rgba(255, 133, 162, 0.1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Mitr', sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-gradient);
+  color: var(--text-main);
+  min-height: 100vh;
+  padding: 30px 20px;
+}
+
+/* Container หลัก */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 35px;
+  box-shadow: var(--shadow);
+  border: 2px solid #fff;
+}
+
+/* หัวข้อ */
+h1, h2, h3 {
+  color: #48c2ff;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* กล่องฟอร์มค้นหา & เพิ่มสินค้า */
+form {
+  background: #4f61ff;
+  padding: 24px;
+  border-radius: 16px;
+  border: 1.5px dashed var(--border-color);
+  margin-bottom: 30px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  align-items: flex-end;
+}
+
+form div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #6c5ce7;
+}
+
+/* ช่องกรอกข้อมูล & Select */
+input, select {
+  padding: 12px 16px;
+  border: 2px solid #438eff;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  outline: none;
+  background: #ffffff;
+  transition: all 0.2s ease;
+  color: var(--text-main);
+}
+
+input:focus, select:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(255, 133, 162, 0.2);
+}
+
+/* ปุ่มกดสุดคิวท์ */
+button {
+  background: linear-gradient(135deg, #85a2ff 0%, #39a6ff 100%);
+  color: white;
+  font-weight: 600;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(44, 150, 255, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(52, 116, 255, 0.4);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ตารางแสดงสินค้า */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  margin-top: 15px;
+}
+
+th {
+  background: #f0f5ff;
+  color: #3ba0ff;
+  padding: 14px;
+  font-weight: 600;
+  text-align: left;
+}
+
+th:first-child { border-radius: 12px 0 0 12px; }
+th:last-child { border-radius: 0 12px 12px 0; }
+
+td {
+  background: #ffffff;
+  padding: 14px;
+  border-top: 1px solid #fff0f3;
+  border-bottom: 1px solid #fff0f3;
+}
+
+tr td:first-child {
+  border-left: 1px solid #fff0f3;
+  border-radius: 12px 0 0 12px;
+}
+
+tr td:last-child {
+  border-right: 1px solid #fff0f3;
+  border-radius: 0 12px 12px 0;
+}
+
+tr:hover td {
+  background: #fffdfd;
+}
+
+/* ข้อความแจ้งเตือนข้อผิดพลาด */
+span[role="alert"] {
+  font-size: 0.8rem;
+  color: #4876ff !important;
+  font-weight: 400;
 }
